@@ -2,8 +2,9 @@
 
 ## Group Members
 
-- Person 1
-- Person 2
+- Susheel Jamakayala
+- Tejaswini Challa
+- Varshith Basani 
 
 ## Overview
 
@@ -15,15 +16,19 @@ This is a Python project that implements a basic shell...
 
 To run the shell, follow these instructions:
 
-1. [Add any specific instructions for setting up or running your shell if necessary.]
+
+
 
 ### Available Commands
 
 Here are some of the commands available in this shell:
 
-- `ls`: Directory listing (Author: Anusha)
-- `pwd`: Working directory (Author: Raj)
-- [Add other available commands as needed.]
+| Command | Description          | Author | Notes |
+| ------- | -------------------- | ------ | ----- |
+| ls      | Directory listing    |        |       |
+| pwd     | Working directory    |        |       |
+| etc.    | etc                  |        |       |
+
 
 ### Non-Working Components
 
