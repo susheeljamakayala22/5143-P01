@@ -41,7 +41,7 @@ Here are some of the commands available in this shell:
 |tail	|	display the last few lines of a file | susheel |
 |tail	-n|	how many lines to display       | susheel |
 |grep	|search a file(s) files for keywords and print lines where pattern is found                                      | susheel |
-|grep -l|	only return file names where the word or pattern is found |
+|grep -l|	only return file names where the word or pattern is found | susheel |
 |wc	|	count number of lines/words/characters in file | varshith |
 |wc -l|	count number of lines in file      | varshith |
 |wc -m|	count number of characters in file | varshith |
