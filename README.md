@@ -47,6 +47,11 @@ Here are some of the commands available in this shell:
 |wc -m|	count number of characters in file | varshith |
 |wc -w|	count number of words in file      | varshith |
 |history| show a history of all your commands | tejaswini |
+|who| 	list users currently logged in | tejaswini |
+|command > file	| redirect standard output to a file |
+|command >> file |	append standard output to a file |
+|command < file |	redirect standard input from a file |
+
 
 
 
