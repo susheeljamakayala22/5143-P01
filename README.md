@@ -52,11 +52,13 @@ Here are some of the commands available in this shell:
 |command >> file |	append standard output to a file |
 |command < file |	redirect standard input from a file |
 
-###Non Working Components
+
+### Not working components
 
 less
 
-###References
+
+### references
 
 
 
