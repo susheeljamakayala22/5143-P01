@@ -130,7 +130,7 @@ class PCB:
         return self.bursts[self.currBurstIndex]
 
 class Simulator:
-    def __init__(self, datfile, noOfCPUs=1, noOfIOs=1):
+    def __init__(self, sleepTime,datfile, noOfCPUs=1, noOfIOs=1):
         self.datfile = datfile
         self.new = Queue()
         self.wait = Queue()
@@ -143,7 +143,7 @@ class Simulator:
         for _ in range(noOfIOs):
             self.IOs.append(IO())
 
-        self.sleepTime = 0.05
+        self.sleepTime = sleepTime
         self.sysclock = SysClock()
         self.setupGUI()
         self.readData()
@@ -168,10 +168,10 @@ class Simulator:
         with dpg.window(label="Exit Queue", width=100, height=500, pos=[500,0], tag="exitQueueWindow"):
             pass
         # Message window
-        with dpg.window(label="Current Status", width=200, height=300, pos=[600,0], tag="messageWindow"):
+        with dpg.window(label="Current Status", width=250, height=200, pos=[600,0], tag="messageWindow"):
             dpg.add_text("FCFS Scheduling", tag="messageBox", wrap=200)
         # Final Message window
-        with dpg.window(label="Result", width=200, height=300, pos=[600,200], tag="FinalMessageWindow"):
+        with dpg.window(label="Result", width=250, height=300, pos=[600,200], tag="FinalMessageWindow"):
             pass
 
     def NewToReady(self):
@@ -253,15 +253,17 @@ class Simulator:
         while len(self.ready.queue) > 0 or len(self.wait.queue) > 0 or len(self.new.queue) > 0 or any([cpu.runningPCB for cpu in self.running]) or any([io.servingPCB for io in self.IOs]):
             self.showTables()           
 
-            if len(self.ready.queue) > 0: 
-                for cpu in self.running:
-                    if not cpu.busy:
-                        cpu.loadProcess(self.ready.removePCB())
-                        cpu.busy = True
-                        dpg.set_value("messageBox", f"At t:{self.sysclock.getClock()} job {cpu.runningPCB.pid} obtained cpu:{self.running.index(cpu)}")
-                    if len(self.ready.queue) <= 0:
-                        break
-                        
+            if len(self.ready.queue) > 0:
+                arrived_processes = [proc for proc in self.ready.queue if proc.arrivalTime <= self.sysclock.getClock()]
+                if arrived_processes:
+                    first_arrived = min(arrived_processes, key=lambda x: x.arrivalTime)
+                    for cpu in self.running:
+                        if not cpu.busy:
+                            cpu.loadProcess(first_arrived)
+                            self.ready.queue.remove(first_arrived)  # Remove the assigned process from the ready queue
+                            cpu.busy = True
+                            dpg.set_value("messageBox", f"At t:{self.sysclock.getClock()} job {first_arrived.pid} obtained cpu:{self.running.index(cpu)}")
+                            break                        
             for cpu in self.running:
                 if cpu.runningPCB:
                     # decrement the current process
@@ -317,6 +319,7 @@ class Simulator:
             self.clearTables()
         self.showStat()
 
+    
     def PB(self):   
         """ Priority Bases
         """
@@ -330,7 +333,7 @@ class Simulator:
                     self.ready.addPCB(self.new.queue[index])
                     self.new.queue.pop(index)
                     dpg.set_value("messageBox", "Process started with pid: " + str(self.ready.queue[-1].pid))
-
+                    self.ready.queue.sort(key=lambda x: int(x.priority[1:]), reverse=True)
                     currentProcessPriority = int(self.ready.queue[-1].priority[1:])
                     
                     for cpu in self.running:
@@ -413,8 +416,10 @@ class Simulator:
                                 preemtedProcess = self.ready.removePCB()
                                 self.ready.addPCB(finishedProcess)
                                 self.ready.addPCB(preemtedProcess)
+                                self.ready.queue.sort(key=lambda x: int(x.priority[1:]), reverse=True)  # Sort after adding both processes
                             else:
                                 self.ready.addPCB(finishedProcess)
+                                self.ready.queue.sort(key=lambda x: int(x.priority[1:]), reverse=True)  # Sort after adding the process
                             finishedProcess.currBurst = 'CPU'
                             dpg.set_value("messageBox", f"IO finished, Process {finishedProcess.pid} moved to READY state")
                             
@@ -550,7 +555,7 @@ class Simulator:
 if __name__ == '__main__':
     
     if len(sys.argv) < 5:
-        print("Usage: python3 Schedular.py <Scheduling Algorithm> <number of CPU> <number of IO> <input file> <Time Quantum-(Required for RR)>")
+        print("Usage: python3 Schedular.py <Scheduling Algorithm> <Sleep Time> <number of CPU> <number of IO> <input file> <Time Quantum-(Required for RR)>")
         print("""
             
             Scheduling Algorithm:
@@ -565,17 +570,18 @@ if __name__ == '__main__':
         print("Time Quantum is required for RR")
         sys.exit(1)
 
-    noOfCpus = int(sys.argv[2])
-    noOfIOs = int(sys.argv[3])
+    noOfCpus = int(sys.argv[3])
+    sleepTime = float(sys.argv[2])
+    noOfIOs = int(sys.argv[4])
     algo = sys.argv[1]
-    inputFile = sys.argv[4]
+    inputFile = sys.argv[5]
     if algo == "RR":
-        timeQuantum = sys.argv[5]
+        timeQuantum = sys.argv[6]
 
-    sim = Simulator(inputFile, noOfCpus,noOfIOs)
+    sim = Simulator(sleepTime,inputFile, noOfCpus,noOfIOs)
 
 
-    dpg.create_viewport(title='CPU Scheduling Simulation', width=800, height=500)
+    dpg.create_viewport(title='CPU Scheduling Simulation', width=850, height=500)
     dpg.setup_dearpygui()
     dpg.show_viewport()
 
